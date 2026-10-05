@@ -1,16 +1,6 @@
 # 🎓 研究所推甄有利資料 | Graduate Application Portfolio
 
-<div align="center">
-  <!-- 核心動作按鈕：解決 GitHub 網頁版 5 頁限制 -->
-  <a href="https://google.com" target="_blank">
-    <img src="https://shields.io🚀_brightgreen?style=for-the-badge" alt="Read Online">
-  </a>
-  <a href="備審資料(全)_張博翔.pdf" download>
-    <img src="https://shields.io" alt="Download PDF">
-  </a>
-</div>
-
-
+[📥 點此開啟完整有利資料](備審資料(全)_張博翔.pdf)
 
 ---
 
