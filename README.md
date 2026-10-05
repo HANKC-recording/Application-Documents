@@ -3,10 +3,10 @@
 <div align="center">
   <!-- 核心動作按鈕：解決 GitHub 網頁版 5 頁限制 -->
   <a href="https://google.com" target="_blank">
-    <img src="https://shields.io📖_線上流暢閱讀-完整推甄_PDF_全文_(破解5頁限制)-🚀_brightgreen?style=for-the-badge" alt="Read Online">
+    <img src="https://shields.io🚀_brightgreen?style=for-the-badge" alt="Read Online">
   </a>
   <a href="備審資料(全)_張博翔.pdf" download>
-    <img src="https://shields.io📥_下載-PDF_原始備審檔案-blue?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Download PDF">
+    <img src="https://shields.io" alt="Download PDF">
   </a>
 </div>
 
