@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>IVERILOG</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>vga_sync</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>module vga_sync(
+    input clk,
+    output hsync,
+    output vsync,
+    output video_on,
+    output [9:0] hcount,
+    output [9:0] vcount
+);
+
+    parameter H_DISPLAY = 640;
+    parameter H_FRONT   = 16;
+    parameter H_SYNC    = 96;
+    parameter H_BACK    = 48;
+    parameter H_TOTAL   = 800;
+
+    parameter V_DISPLAY = 480;
+    parameter V_FRONT   = 10;
+    parameter V_SYNC    = 2;
+    parameter V_BACK    = 33;
+    parameter V_TOTAL   = 525;
+
+    // 計數器用reg
+    reg [9:0] h_cnt = 0;
+    reg [9:0] v_cnt = 0;
+
+    // 水平計數器
+    always @(posedge clk) begin
+        if (h_cnt == H_TOTAL - 1)
+            h_cnt &lt;= 0;
+        else
+            h_cnt &lt;= h_cnt + 1;
+    end
+
+    // 垂直計數器
+    always @(posedge clk) begin
+        if (h_cnt == H_TOTAL - 1) begin
+            if (v_cnt == V_TOTAL - 1)
+                v_cnt &lt;= 0;
+            else
+                v_cnt &lt;= v_cnt + 1;
+        end
+    end
+
+    // 組合邏輯輸出
+    assign hcount   = h_cnt;
+    assign vcount   = v_cnt;
+    assign hsync    = ~((h_cnt &gt;= H_DISPLAY + H_FRONT) &amp;&amp;
+                        (h_cnt &lt;  H_DISPLAY + H_FRONT + H_SYNC));
+    assign vsync    = ~((v_cnt &gt;= V_DISPLAY + V_FRONT) &amp;&amp;
+                        (v_cnt &lt;  V_DISPLAY + V_FRONT + V_SYNC));
+    assign video_on = (h_cnt &lt; H_DISPLAY) &amp;&amp; (v_cnt &lt; V_DISPLAY);
+
+endmodule</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>hsync,vsync,video_on,hcount:10,vcount:10</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>6</int>
+        </entry>
+      </elementAttributes>
+      <pos x="540" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Clock_global</string>
+        </entry>
+        <entry>
+          <string>Frequency</string>
+          <int>2147483647</int>
+        </entry>
+      </elementAttributes>
+      <pos x="360" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>clk</string>
+        </entry>
+      </elementAttributes>
+      <pos x="400" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>clk</string>
+        </entry>
+      </elementAttributes>
+      <pos x="500" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>hsync</string>
+        </entry>
+      </elementAttributes>
+      <pos x="680" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>vsync</string>
+        </entry>
+      </elementAttributes>
+      <pos x="720" y="380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>video_on</string>
+        </entry>
+      </elementAttributes>
+      <pos x="760" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>hcount</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>10</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
+        </entry>
+      </elementAttributes>
+      <pos x="800" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>vcount</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>10</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
+        </entry>
+      </elementAttributes>
+      <pos x="840" y="440"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="500" y="240"/>
+      <p2 x="540" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="240"/>
+      <p2 x="400" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="240"/>
+      <p2 x="680" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="320"/>
+      <p2 x="840" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="260"/>
+      <p2 x="720" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="280"/>
+      <p2 x="760" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="300"/>
+      <p2 x="800" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="720" y="260"/>
+      <p2 x="720" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="800" y="300"/>
+      <p2 x="800" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="680" y="240"/>
+      <p2 x="680" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="760" y="280"/>
+      <p2 x="760" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="840" y="320"/>
+      <p2 x="840" y="440"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>
