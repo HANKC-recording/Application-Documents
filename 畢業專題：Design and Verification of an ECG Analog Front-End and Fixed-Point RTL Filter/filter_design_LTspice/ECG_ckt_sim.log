@@ -1,0 +1,15 @@
+LTspice 26.0.1 for Windows
+Circuit: D:\lab\LTspice\LTspice file\filter_design\ECG_ckt_sim.net
+Start Time: Mon Sep 28 01:10:18 2026
+solver = Normal
+Maximum thread count: 32
+tnom = 27
+temp = 27
+method = Gear
+Direct Newton iteration succeeded in finding operating point.
+Total elapsed time: 0.068 seconds.
+
+Files loaded:
+D:\lab\LTspice\LTspice file\filter_design\ECG_ckt_sim.net
+D:\lab\LTspice\LTspice file\filter_design\lm741.lib
+
