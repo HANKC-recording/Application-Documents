@@ -1,0 +1,276 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Clock: 27MHz
+// DB_MAX 計算: 27,000,000 × 0.02 - 1 = 539,999 (20ms debounce)
+//////////////////////////////////////////////////////////////////////////////////
+module Vedic(
+    input  wire clk,
+
+    input  wire sw1,   // b0
+    input  wire sw2,   // b1
+    input  wire pb1,   // a0 button
+    input  wire pb2,   // a1 button
+    output wire led0,  // p0
+    output wire led1,  // p1
+    output wire led2,  // p2
+    output wire led3   // p3
+    );
+
+    // =====================================================
+    // debounce 參數
+    // clk = 27MHz，週期 = 37.037ns
+    // 20ms = 27,000,000 × 0.02 - 1 = 539,999
+    // =====================================================
+    parameter DB_MAX = 539999;
+
+    // =====================================================
+    // PB1 debounce
+    // =====================================================
+    reg pb1_ff1;
+    reg pb1_ff2;
+    reg pb1_db;
+    reg [31:0] pb1_db_cnt;
+
+    always @(posedge clk) begin
+        pb1_ff1 <= pb1;
+        pb1_ff2 <= pb1_ff1;
+
+        if (pb1_ff2 == pb1_db) begin
+            pb1_db_cnt <= 32'd0;
+        end
+        else begin
+            if (pb1_db_cnt == DB_MAX - 1) begin  // 用 == 避免溢位跳過
+                pb1_db     <= pb1_ff2;
+                pb1_db_cnt <= 32'd0;
+            end
+            else begin
+                pb1_db_cnt <= pb1_db_cnt + 1'b1;
+            end
+        end
+    end
+
+    // =====================================================
+    // PB2 debounce
+    // =====================================================
+    reg pb2_ff1;
+    reg pb2_ff2;
+    reg pb2_db;
+    reg [31:0] pb2_db_cnt;
+
+    always @(posedge clk) begin
+        pb2_ff1 <= pb2;
+        pb2_ff2 <= pb2_ff1;
+
+        if (pb2_ff2 == pb2_db) begin
+            pb2_db_cnt <= 32'd0;
+        end
+        else begin
+            if (pb2_db_cnt == DB_MAX - 1) begin  // 用 == 避免溢位跳過
+                pb2_db     <= pb2_ff2;
+                pb2_db_cnt <= 32'd0;
+            end
+            else begin
+                pb2_db_cnt <= pb2_db_cnt + 1'b1;
+            end
+        end
+    end
+
+    // =====================================================
+    // Vedic Multiplier input
+    // =====================================================
+    wire a0;
+    wire a1;
+    wire b0;
+    wire b1;
+    assign a0 = pb1_db;
+    assign a1 = pb2_db;
+    assign b0 = sw1;
+    assign b1 = sw2;
+
+    // =====================================================
+    // 2-bit Vedic Multiplier
+    // A = a1 a0
+    // B = b1 b0
+    // P = led3 led2 led1 led0
+    // =====================================================
+    wire w0;
+    wire w1;
+    wire w2;
+    wire c1;
+    wire c2;
+
+    // p0 = a0 * b0
+    assign led0 = a0 & b0;
+
+    // p1 = a1*b0 + a0*b1 的低位
+    assign w0 = a1 & b0;
+    assign w1 = a0 & b1;
+    assign led1 = w0 ^ w1;
+    assign c1   = w0 & w1;
+
+    // p2, p3
+    assign w2 = a1 & b1;
+    assign led2 = w2 ^ c1;
+    assign c2   = w2 & c1;
+    assign led3 = c2;
+
+endmodule
+
+
+/switch也被debounce
+
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Clock: 27MHz
+// DB_MAX 計算: 27,000,000 × 0.02 - 1 = 539,999 (20ms debounce)
+// 所有輸入（PB1, PB2, SW1, SW2）皆加 debounce
+//////////////////////////////////////////////////////////////////////////////////
+module project0525(
+    input  wire clk,
+
+    input  wire sw1,   // b0
+    input  wire sw2,   // b1
+    input  wire pb1,   // a0 button
+    input  wire pb2,   // a1 button
+    output wire led0,  // p0
+    output wire led1,  // p1
+    output wire led2,  // p2
+    output wire led3   // p3
+    );
+
+    // =====================================================
+    // debounce 參數
+    // clk = 27MHz，週期 = 37.037ns
+    // 20ms = 27,000,000 × 0.02 - 1 = 539,999
+    // =====================================================
+    parameter DB_MAX = 539999;
+
+    // =====================================================
+    // PB1 debounce
+    // =====================================================
+    reg pb1_ff1, pb1_ff2, pb1_db;
+    reg [31:0] pb1_db_cnt;
+
+    always @(posedge clk) begin
+        pb1_ff1 <= pb1;
+        pb1_ff2 <= pb1_ff1;
+
+        if (pb1_ff2 == pb1_db) begin
+            pb1_db_cnt <= 32'd0;
+        end
+        else begin
+            if (pb1_db_cnt == DB_MAX - 1) begin
+                pb1_db     <= pb1_ff2;
+                pb1_db_cnt <= 32'd0;
+            end
+            else begin
+                pb1_db_cnt <= pb1_db_cnt + 1'b1;
+            end
+        end
+    end
+
+    // =====================================================
+    // PB2 debounce
+    // =====================================================
+    reg pb2_ff1, pb2_ff2, pb2_db;
+    reg [31:0] pb2_db_cnt;
+
+    always @(posedge clk) begin
+        pb2_ff1 <= pb2;
+        pb2_ff2 <= pb2_ff1;
+
+        if (pb2_ff2 == pb2_db) begin
+            pb2_db_cnt <= 32'd0;
+        end
+        else begin
+            if (pb2_db_cnt == DB_MAX - 1) begin
+                pb2_db     <= pb2_ff2;
+                pb2_db_cnt <= 32'd0;
+            end
+            else begin
+                pb2_db_cnt <= pb2_db_cnt + 1'b1;
+            end
+        end
+    end
+
+    // =====================================================
+    // SW1 debounce
+    // =====================================================
+    reg sw1_ff1, sw1_ff2, sw1_db;
+    reg [31:0] sw1_db_cnt;
+
+    always @(posedge clk) begin
+        sw1_ff1 <= sw1;
+        sw1_ff2 <= sw1_ff1;
+
+        if (sw1_ff2 == sw1_db) begin
+            sw1_db_cnt <= 32'd0;
+        end
+        else begin
+            if (sw1_db_cnt == DB_MAX - 1) begin
+                sw1_db     <= sw1_ff2;
+                sw1_db_cnt <= 32'd0;
+            end
+            else begin
+                sw1_db_cnt <= sw1_db_cnt + 1'b1;
+            end
+        end
+    end
+
+    // =====================================================
+    // SW2 debounce
+    // =====================================================
+    reg sw2_ff1, sw2_ff2, sw2_db;
+    reg [31:0] sw2_db_cnt;
+
+    always @(posedge clk) begin
+        sw2_ff1 <= sw2;
+        sw2_ff2 <= sw2_ff1;
+
+        if (sw2_ff2 == sw2_db) begin
+            sw2_db_cnt <= 32'd0;
+        end
+        else begin
+            if (sw2_db_cnt == DB_MAX - 1) begin
+                sw2_db     <= sw2_ff2;
+                sw2_db_cnt <= 32'd0;
+            end
+            else begin
+                sw2_db_cnt <= sw2_db_cnt + 1'b1;
+            end
+        end
+    end
+
+    // =====================================================
+    // Vedic Multiplier input
+    // =====================================================
+    wire a0, a1, b0, b1;
+    assign a0 = pb1_db;
+    assign a1 = pb2_db;
+    assign b0 = sw1_db;
+    assign b1 = sw2_db;
+
+    // =====================================================
+    // 2-bit Vedic Multiplier
+    // A = a1 a0
+    // B = b1 b0
+    // P = led3 led2 led1 led0
+    // =====================================================
+    wire w0, w1, w2, c1, c2;
+
+    // p0 = a0 * b0
+    assign led0 = a0 & b0;
+
+    // p1 = a1*b0 + a0*b1 的低位
+    assign w0 = a1 & b0;
+    assign w1 = a0 & b1;
+    assign led1 = w0 ^ w1;
+    assign c1   = w0 & w1;
+
+    // p2, p3
+    assign w2 = a1 & b1;
+    assign led2 = w2 ^ c1;
+    assign c2   = w2 & c1;
+    assign led3 = c2;
+
+endmodule

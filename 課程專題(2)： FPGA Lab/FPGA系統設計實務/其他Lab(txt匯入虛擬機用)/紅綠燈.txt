@@ -1,0 +1,225 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Clock: 27MHz
+// 時間參數計算（公式：目標秒數 × 27,000,000 - 1）：
+//   GREEN_TIME  = 2sec    → 27,000,000 × 2   - 1 = 53,999,999
+//   YELLOW_TIME = 0.5sec  → 27,000,000 × 0.5 - 1 = 13,499,999
+//   RED_TIME    = 3sec    → 27,000,000 × 3   - 1 = 80,999,999
+//   HALF_SEC    = 0.5sec  → 27,000,000 × 0.5 - 1 = 13,499,999
+//   DB_MAX      = 20ms    → 27,000,000 × 0.02- 1 = 539,999
+//////////////////////////////////////////////////////////////////////////////////
+module RGB(
+    input  wire clk,
+    input  wire reset,
+    input  wire s1,
+
+    output reg  led0_green,
+    output reg  led1_yellow,
+    output reg  led2_red,
+    output reg  led3_warning
+    );
+
+    // =====================================================
+    // 時間參數（27MHz）
+    // =====================================================
+    parameter GREEN_TIME  = 53999999;   // 2 sec
+    parameter YELLOW_TIME = 13499999;   // 0.5 sec
+    parameter RED_TIME    = 80999999;   // 3 sec
+    parameter HALF_SEC    = 13499999;   // 0.5 sec
+
+    // debounce 20ms
+    parameter DB_MAX = 539999;
+
+    // =====================================================
+    // 狀態編碼
+    // =====================================================
+    localparam STATE_GREEN  = 2'b00;
+    localparam STATE_YELLOW = 2'b01;
+    localparam STATE_RED    = 2'b10;
+
+    reg [1:0] state;
+    reg [31:0] timer_cnt;
+
+    // =====================================================
+    // S1 debounce
+    // =====================================================
+    reg s1_ff1;
+    reg s1_ff2;
+    reg s1_db;
+    reg [31:0] db_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s1_ff1 <= 1'b0;
+            s1_ff2 <= 1'b0;
+            s1_db  <= 1'b0;
+            db_cnt <= 32'd0;
+        end
+        else begin
+            s1_ff1 <= s1;
+            s1_ff2 <= s1_ff1;
+
+            if (s1_ff2 == s1_db) begin
+                db_cnt <= 32'd0;
+            end
+            else begin
+                if (db_cnt == DB_MAX - 1) begin  // 用 == 避免溢位跳過
+                    s1_db  <= s1_ff2;
+                    db_cnt <= 32'd0;
+                end
+                else begin
+                    db_cnt <= db_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // S1 one pulse
+    // =====================================================
+    reg s1_db_d;
+    wire s1_pulse;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s1_db_d <= 1'b0;
+        end
+        else begin
+            s1_db_d <= s1_db;
+        end
+    end
+
+    assign s1_pulse = s1_db & ~s1_db_d;
+
+    // =====================================================
+    // 交通燈主狀態機
+    // =====================================================
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            state     <= STATE_GREEN;
+            timer_cnt <= 32'd0;
+        end
+        else begin
+            case (state)
+                STATE_GREEN: begin
+                    if (timer_cnt == GREEN_TIME - 1) begin  // 用 ==
+                        timer_cnt <= 32'd0;
+                        state     <= STATE_YELLOW;
+                    end
+                    else begin
+                        timer_cnt <= timer_cnt + 1'b1;
+                    end
+                end
+
+                STATE_YELLOW: begin
+                    if (timer_cnt == YELLOW_TIME - 1) begin
+                        timer_cnt <= 32'd0;
+                        state     <= STATE_RED;
+                    end
+                    else begin
+                        timer_cnt <= timer_cnt + 1'b1;
+                    end
+                end
+
+                STATE_RED: begin
+                    if (timer_cnt == RED_TIME - 1) begin
+                        timer_cnt <= 32'd0;
+                        state     <= STATE_GREEN;
+                    end
+                    else begin
+                        timer_cnt <= timer_cnt + 1'b1;
+                    end
+                end
+
+                default: begin
+                    state     <= STATE_GREEN;
+                    timer_cnt <= 32'd0;
+                end
+            endcase
+        end
+    end
+
+    // =====================================================
+    // LED0 / LED1 / LED2 輸出控制
+    // =====================================================
+    always @(*) begin
+        led0_green  = 1'b0;
+        led1_yellow = 1'b0;
+        led2_red    = 1'b0;
+
+        case (state)
+            STATE_GREEN:  led0_green  = 1'b1;
+            STATE_YELLOW: led1_yellow = 1'b1;
+            STATE_RED:    led2_red    = 1'b1;
+            default: begin
+                led0_green  = 1'b0;
+                led1_yellow = 1'b0;
+                led2_red    = 1'b0;
+            end
+        endcase
+    end
+
+    // =====================================================
+    // LED3 警示燈控制
+    // 紅燈時，S1 感應到車子 → LED3 亮 0.5 秒、滅 0.5 秒
+    // =====================================================
+    reg warning_active;
+    reg warning_phase;
+    reg [31:0] warning_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            warning_active <= 1'b0;
+            warning_phase  <= 1'b0;
+            warning_cnt    <= 32'd0;
+            led3_warning   <= 1'b0;
+        end
+        else begin
+            led3_warning <= 1'b0;
+
+            if (state == STATE_RED) begin
+
+                if (s1_pulse && !warning_active) begin
+                    warning_active <= 1'b1;
+                    warning_phase  <= 1'b0;
+                    warning_cnt    <= 32'd0;
+                end
+
+                if (warning_active) begin
+                    if (warning_phase == 1'b0) begin
+                        // LED3 亮 0.5 秒
+                        led3_warning <= 1'b1;
+
+                        if (warning_cnt == HALF_SEC - 1) begin  // 用 ==
+                            warning_cnt   <= 32'd0;
+                            warning_phase <= 1'b1;
+                        end
+                        else begin
+                            warning_cnt <= warning_cnt + 1'b1;
+                        end
+                    end
+                    else begin
+                        // LED3 滅 0.5 秒
+                        led3_warning <= 1'b0;
+
+                        if (warning_cnt == HALF_SEC - 1) begin  // 用 ==
+                            warning_cnt    <= 32'd0;
+                            warning_phase  <= 1'b0;
+                            warning_active <= 1'b0;
+                        end
+                        else begin
+                            warning_cnt <= warning_cnt + 1'b1;
+                        end
+                    end
+                end
+            end
+            else begin
+                warning_active <= 1'b0;
+                warning_phase  <= 1'b0;
+                warning_cnt    <= 32'd0;
+                led3_warning   <= 1'b0;
+            end
+        end
+    end
+
+endmodule

@@ -1,0 +1,100 @@
+`timescale 1ns / 1ps
+module cube(
+    input clk,
+    input x,
+    input reset,
+    output reg y,
+    output reg [1:0] count
+    );
+
+    reg [31:0] div_cnt;
+    reg slow_clk;
+
+    // =========================
+    // button debounce for x
+    // =========================
+    reg x_ff1;
+    reg x_ff2;
+    reg x_db;
+    reg [31:0] db_cnt;
+
+    // clk = 27MHz
+    // 20ms = 27,000,000 × 0.02 - 1 = 539,999
+    parameter DB_MAX = 539999;
+
+    always @(posedge clk or posedge reset) begin
+        if(reset) begin
+            x_ff1  <= 0;
+            x_ff2  <= 0;
+            x_db   <= 0;
+            db_cnt <= 0;
+        end
+        else begin
+            // 先同步，避免按鈕非同步輸入造成亞穩態
+            x_ff1 <= x;
+            x_ff2 <= x_ff1;
+
+            // 如果同步後的 x_ff2 跟目前穩定值 x_db 一樣
+            // 代表沒有變化，計數器歸零
+            if(x_ff2 == x_db) begin
+                db_cnt <= 0;
+            end
+            // 如果 x_ff2 跟 x_db 不一樣
+            // 代表可能正在彈跳，開始計數
+            else begin
+                if(db_cnt == DB_MAX) begin
+                    x_db   <= x_ff2;
+                    db_cnt <= 0;
+                end
+                else begin
+                    db_cnt <= db_cnt + 1;
+                end
+            end
+        end
+    end
+
+    // =========================
+    // clock divider
+    // clk = 27MHz，0.5s toggle
+    // 27,000,000 × 0.5 - 1 = 13,499,999
+    // half period = 13,499,999 / 2 ≈ 6,749,999
+    // =========================
+    always @(posedge clk or posedge reset) begin
+        if(reset) begin
+            div_cnt  <= 0;
+            slow_clk <= 0;
+        end
+        else if (div_cnt == 6749999) begin
+            div_cnt  <= 0;
+            slow_clk <= ~slow_clk;
+        end
+        else begin
+            div_cnt <= div_cnt + 1;
+        end
+    end
+
+    // =========================
+    // state control
+    // =========================
+    always @(posedge slow_clk or posedge reset) begin
+        if(reset) begin
+            count <= 2'b00;
+            y     <= 0;
+        end
+
+        // 改成用防彈跳後的 x_db
+        else if (x_db) begin
+            y     <= 0;
+            count <= count + 1;
+
+            if(count == 2'b11) begin
+                y <= 1;
+            end
+        end
+
+        else begin
+            count <= count;
+        end
+    end
+
+endmodule

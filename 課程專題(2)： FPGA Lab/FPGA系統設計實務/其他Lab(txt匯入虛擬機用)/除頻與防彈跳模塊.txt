@@ -1,0 +1,362 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// 共用模組：除頻器 + Debounce（8個）
+// Clock: 27MHz
+//
+// 使用方式：
+//   直接從此檔案複製需要的 always 區塊貼入你的主模組
+//   或將此檔案與主模組一起加入 Xilinx 專案
+//
+// 變數對照表：
+//   除頻輸出：slow_clk        → 接狀態機的 posedge slow_clk
+//   SW debounce輸出：
+//     sw0_db                  → 直接當穩定的撥動開關值使用
+//     sw1_db
+//     sw2_db
+//     sw3_db
+//   PB debounce輸出：
+//     pb0_db                  → 接 one pulse 電路再使用
+//     pb1_db
+//     pb2_db
+//     pb3_db
+//   PB one pulse輸出：
+//     pb0_pulse               → 接狀態機，按一下只觸發一拍
+//     pb1_pulse
+//     pb2_pulse
+//     pb3_pulse
+//////////////////////////////////////////////////////////////////////////////////
+
+module utility_modules(
+    input  wire clk,
+    input  wire reset,
+
+    // 撥動開關輸入
+    input  wire sw0,
+    input  wire sw1,
+    input  wire sw2,
+    input  wire sw3,
+
+    // 按鈕輸入
+    input  wire pb0,
+    input  wire pb1,
+    input  wire pb2,
+    input  wire pb3,
+
+    // 除頻輸出
+    output reg  slow_clk,
+
+    // SW debounce 輸出（穩定電位值）
+    output reg  sw0_db,
+    output reg  sw1_db,
+    output reg  sw2_db,
+    output reg  sw3_db,
+
+    // PB one pulse 輸出（按一下只有一拍）
+    output wire pb0_pulse,
+    output wire pb1_pulse,
+    output wire pb2_pulse,
+    output wire pb3_pulse
+    );
+
+    // =====================================================
+    // 時間參數（27MHz）
+    // 除頻 0.5s toggle：27,000,000 × 0.5 / 2 - 1 = 6,749,999
+    // Debounce 20ms：27,000,000 × 0.02 - 1 = 539,999
+    // =====================================================
+    parameter DIV_MAX = 6749999;
+    parameter DB_MAX  = 539999;
+
+    // =====================================================
+    // 除頻器
+    // slow_clk 週期 = 0.5s（每 6,749,999 拍 toggle 一次）
+    // 用法：always @(posedge slow_clk or posedge reset)
+    // =====================================================
+    reg [31:0] div_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            div_cnt  <= 32'd0;
+            slow_clk <= 1'b0;
+        end
+        else if (div_cnt == DIV_MAX) begin
+            div_cnt  <= 32'd0;
+            slow_clk <= ~slow_clk;
+        end
+        else begin
+            div_cnt <= div_cnt + 1'b1;
+        end
+    end
+
+    // =====================================================
+    // SW0 debounce
+    // 輸出：sw0_db → 撥動開關穩定值，直接用
+    // =====================================================
+    reg sw0_ff1, sw0_ff2;
+    reg [31:0] sw0_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            sw0_ff1 <= 1'b0;
+            sw0_ff2 <= 1'b0;
+            sw0_db  <= 1'b0;
+            sw0_cnt <= 32'd0;
+        end
+        else begin
+            sw0_ff1 <= sw0;
+            sw0_ff2 <= sw0_ff1;
+            if (sw0_ff2 == sw0_db) begin
+                sw0_cnt <= 32'd0;
+            end
+            else begin
+                if (sw0_cnt == DB_MAX - 1) begin
+                    sw0_db  <= sw0_ff2;
+                    sw0_cnt <= 32'd0;
+                end
+                else begin
+                    sw0_cnt <= sw0_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // SW1 debounce
+    // 輸出：sw1_db
+    // =====================================================
+    reg sw1_ff1, sw1_ff2;
+    reg [31:0] sw1_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            sw1_ff1 <= 1'b0;
+            sw1_ff2 <= 1'b0;
+            sw1_db  <= 1'b0;
+            sw1_cnt <= 32'd0;
+        end
+        else begin
+            sw1_ff1 <= sw1;
+            sw1_ff2 <= sw1_ff1;
+            if (sw1_ff2 == sw1_db) begin
+                sw1_cnt <= 32'd0;
+            end
+            else begin
+                if (sw1_cnt == DB_MAX - 1) begin
+                    sw1_db  <= sw1_ff2;
+                    sw1_cnt <= 32'd0;
+                end
+                else begin
+                    sw1_cnt <= sw1_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // SW2 debounce
+    // 輸出：sw2_db
+    // =====================================================
+    reg sw2_ff1, sw2_ff2;
+    reg [31:0] sw2_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            sw2_ff1 <= 1'b0;
+            sw2_ff2 <= 1'b0;
+            sw2_db  <= 1'b0;
+            sw2_cnt <= 32'd0;
+        end
+        else begin
+            sw2_ff1 <= sw2;
+            sw2_ff2 <= sw2_ff1;
+            if (sw2_ff2 == sw2_db) begin
+                sw2_cnt <= 32'd0;
+            end
+            else begin
+                if (sw2_cnt == DB_MAX - 1) begin
+                    sw2_db  <= sw2_ff2;
+                    sw2_cnt <= 32'd0;
+                end
+                else begin
+                    sw2_cnt <= sw2_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // SW3 debounce
+    // 輸出：sw3_db
+    // =====================================================
+    reg sw3_ff1, sw3_ff2;
+    reg [31:0] sw3_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            sw3_ff1 <= 1'b0;
+            sw3_ff2 <= 1'b0;
+            sw3_db  <= 1'b0;
+            sw3_cnt <= 32'd0;
+        end
+        else begin
+            sw3_ff1 <= sw3;
+            sw3_ff2 <= sw3_ff1;
+            if (sw3_ff2 == sw3_db) begin
+                sw3_cnt <= 32'd0;
+            end
+            else begin
+                if (sw3_cnt == DB_MAX - 1) begin
+                    sw3_db  <= sw3_ff2;
+                    sw3_cnt <= 32'd0;
+                end
+                else begin
+                    sw3_cnt <= sw3_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // PB0 debounce + one pulse
+    // 輸出：pb0_pulse → 按一下只觸發一拍，接狀態機用
+    // =====================================================
+    reg pb0_ff1, pb0_ff2, pb0_db, pb0_db_d;
+    reg [31:0] pb0_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            pb0_ff1  <= 1'b0;
+            pb0_ff2  <= 1'b0;
+            pb0_db   <= 1'b0;
+            pb0_db_d <= 1'b0;
+            pb0_cnt  <= 32'd0;
+        end
+        else begin
+            pb0_ff1 <= pb0;
+            pb0_ff2 <= pb0_ff1;
+            if (pb0_ff2 == pb0_db) begin
+                pb0_cnt <= 32'd0;
+            end
+            else begin
+                if (pb0_cnt == DB_MAX - 1) begin
+                    pb0_db  <= pb0_ff2;
+                    pb0_cnt <= 32'd0;
+                end
+                else begin
+                    pb0_cnt <= pb0_cnt + 1'b1;
+                end
+            end
+            pb0_db_d <= pb0_db;  // one pulse 用的延遲一拍
+        end
+    end
+
+    assign pb0_pulse = pb0_db & ~pb0_db_d;
+
+    // =====================================================
+    // PB1 debounce + one pulse
+    // 輸出：pb1_pulse
+    // =====================================================
+    reg pb1_ff1, pb1_ff2, pb1_db, pb1_db_d;
+    reg [31:0] pb1_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            pb1_ff1  <= 1'b0;
+            pb1_ff2  <= 1'b0;
+            pb1_db   <= 1'b0;
+            pb1_db_d <= 1'b0;
+            pb1_cnt  <= 32'd0;
+        end
+        else begin
+            pb1_ff1 <= pb1;
+            pb1_ff2 <= pb1_ff1;
+            if (pb1_ff2 == pb1_db) begin
+                pb1_cnt <= 32'd0;
+            end
+            else begin
+                if (pb1_cnt == DB_MAX - 1) begin
+                    pb1_db  <= pb1_ff2;
+                    pb1_cnt <= 32'd0;
+                end
+                else begin
+                    pb1_cnt <= pb1_cnt + 1'b1;
+                end
+            end
+            pb1_db_d <= pb1_db;
+        end
+    end
+
+    assign pb1_pulse = pb1_db & ~pb1_db_d;
+
+    // =====================================================
+    // PB2 debounce + one pulse
+    // 輸出：pb2_pulse
+    // =====================================================
+    reg pb2_ff1, pb2_ff2, pb2_db, pb2_db_d;
+    reg [31:0] pb2_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            pb2_ff1  <= 1'b0;
+            pb2_ff2  <= 1'b0;
+            pb2_db   <= 1'b0;
+            pb2_db_d <= 1'b0;
+            pb2_cnt  <= 32'd0;
+        end
+        else begin
+            pb2_ff1 <= pb2;
+            pb2_ff2 <= pb2_ff1;
+            if (pb2_ff2 == pb2_db) begin
+                pb2_cnt <= 32'd0;
+            end
+            else begin
+                if (pb2_cnt == DB_MAX - 1) begin
+                    pb2_db  <= pb2_ff2;
+                    pb2_cnt <= 32'd0;
+                end
+                else begin
+                    pb2_cnt <= pb2_cnt + 1'b1;
+                end
+            end
+            pb2_db_d <= pb2_db;
+        end
+    end
+
+    assign pb2_pulse = pb2_db & ~pb2_db_d;
+
+    // =====================================================
+    // PB3 debounce + one pulse
+    // 輸出：pb3_pulse
+    // =====================================================
+    reg pb3_ff1, pb3_ff2, pb3_db, pb3_db_d;
+    reg [31:0] pb3_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            pb3_ff1  <= 1'b0;
+            pb3_ff2  <= 1'b0;
+            pb3_db   <= 1'b0;
+            pb3_db_d <= 1'b0;
+            pb3_cnt  <= 32'd0;
+        end
+        else begin
+            pb3_ff1 <= pb3;
+            pb3_ff2 <= pb3_ff1;
+            if (pb3_ff2 == pb3_db) begin
+                pb3_cnt <= 32'd0;
+            end
+            else begin
+                if (pb3_cnt == DB_MAX - 1) begin
+                    pb3_db  <= pb3_ff2;
+                    pb3_cnt <= 32'd0;
+                end
+                else begin
+                    pb3_cnt <= pb3_cnt + 1'b1;
+                end
+            end
+            pb3_db_d <= pb3_db;
+        end
+    end
+
+    assign pb3_pulse = pb3_db & ~pb3_db_d;
+
+endmodule

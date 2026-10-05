@@ -1,0 +1,36 @@
+module data_detector (
+    input clk,
+    input rst_n,
+    input data_in,      // 一串輸入資料 (Serial Input)
+    input [3:0] p,      // 欲找尋的資料 (Target Data)
+    output reg r,       // 比對正確顯示 (Match Flag)
+    output reg [3:0] c  // 顯示正確的次數 (Counter)
+);
+
+    // 宣告一個 4-bit 的移位暫存器作為「觀景窗」
+    reg [3:0] shift_reg; 
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            shift_reg <= 4'b0000;
+            r         <= 1'b0;
+            c         <= 4'b0000;
+        end 
+        else begin
+            // 1. 移位動作：將最舊的 bit 丟掉，新的 data_in 從右邊推入 (LSB)
+            shift_reg <= {shift_reg[2:0], data_in};
+
+            // 2. 比對動作：檢查「最新」的 4 bits 是否等於 P
+            // 注意：我們用 {shift_reg[2:0], data_in} 代表推入後的最新狀態
+            if ({shift_reg[2:0], data_in} == p) begin
+                r <= 1'b1;       // 舉起 R 旗標
+                c <= c + 1'b1;   // 次數加 1
+            end 
+            else begin
+                r <= 1'b0;       // 沒配對成功，放下 R 旗標
+                // c 保持不變
+            end
+        end
+    end
+
+endmodule

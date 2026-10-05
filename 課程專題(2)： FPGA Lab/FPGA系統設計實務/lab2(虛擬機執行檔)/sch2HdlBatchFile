@@ -1,0 +1,2 @@
+sch2hdl,-intstyle,ise,-family,spartan6,-verilog,/home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/ser_adder.vf,-w,/home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/ser_adder.sch
+sch2hdl,-intstyle,ise,-family,spartan6,-verilog,/home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/full_adder_1bits.vf,-w,/home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/full_adder_1bits.sch

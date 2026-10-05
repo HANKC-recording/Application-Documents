@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/ser_adder_ser_adder_sch_tb_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="ser_adder_ser_adder_sch_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="4" />
+   <wvobject fp_name="/ser_adder_ser_adder_sch_tb/Cin" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Cin</obj_property>
+      <obj_property name="ObjectShortName">Cin</obj_property>
+   </wvobject>
+   <wvobject fp_name="vbus15" type="vbus" db_ref_id="1">
+      <obj_property name="label">A</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/A3" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">A3</obj_property>
+         <obj_property name="ObjectShortName">A3</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/A2" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">A2</obj_property>
+         <obj_property name="ObjectShortName">A2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/A1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">A1</obj_property>
+         <obj_property name="ObjectShortName">A1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/A0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">A0</obj_property>
+         <obj_property name="ObjectShortName">A0</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="vbus16" type="vbus" db_ref_id="1">
+      <obj_property name="label">B</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/B3" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">B3</obj_property>
+         <obj_property name="ObjectShortName">B3</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/B2" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">B2</obj_property>
+         <obj_property name="ObjectShortName">B2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/B1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">B1</obj_property>
+         <obj_property name="ObjectShortName">B1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/B0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">B0</obj_property>
+         <obj_property name="ObjectShortName">B0</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="vbus17" type="vbus" db_ref_id="1">
+      <obj_property name="label">Output</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/Cout" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">Cout</obj_property>
+         <obj_property name="ObjectShortName">Cout</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/Sum3" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">Sum3</obj_property>
+         <obj_property name="ObjectShortName">Sum3</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/Sum2" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">Sum2</obj_property>
+         <obj_property name="ObjectShortName">Sum2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/Sum1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">Sum1</obj_property>
+         <obj_property name="ObjectShortName">Sum1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ser_adder_ser_adder_sch_tb/Sum0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">Sum0</obj_property>
+         <obj_property name="ObjectShortName">Sum0</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

@@ -1,0 +1,197 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// 室內空間人數控制與顯示系統
+// Clock: 27MHz
+// DB_MAX: 27,000,000 × 0.02 - 1 = 539,999 (20ms debounce)
+//////////////////////////////////////////////////////////////////////////////////
+module project_room(
+    input  wire clk,
+    input  wire reset,
+
+    input  wire sensor1,   // PB0，入口感測器（外側）
+    input  wire sensor2,   // PB1，出口感測器（內側）
+
+    output reg  led0,      // 人數顯示 bit0
+    output reg  led1,      // 人數顯示 bit1
+    output reg  led2,      // 人數顯示 bit2
+    output reg  led3       // 閘門開關（亮=開，滅=關）
+    );
+
+    // =====================================================
+    // Debounce 參數
+    // clk = 27MHz
+    // 20ms = 27,000,000 × 0.02 - 1 = 539,999
+    // =====================================================
+    parameter DB_MAX = 539999;
+
+    // =====================================================
+    // Sensor1 debounce
+    // =====================================================
+    reg s1_ff1, s1_ff2, s1_db;
+    reg [31:0] s1_db_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s1_ff1    <= 1'b0;
+            s1_ff2    <= 1'b0;
+            s1_db     <= 1'b0;
+            s1_db_cnt <= 32'd0;
+        end
+        else begin
+            s1_ff1 <= sensor1;
+            s1_ff2 <= s1_ff1;
+
+            if (s1_ff2 == s1_db) begin
+                s1_db_cnt <= 32'd0;
+            end
+            else begin
+                if (s1_db_cnt == DB_MAX - 1) begin
+                    s1_db     <= s1_ff2;
+                    s1_db_cnt <= 32'd0;
+                end
+                else begin
+                    s1_db_cnt <= s1_db_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // Sensor2 debounce
+    // =====================================================
+    reg s2_ff1, s2_ff2, s2_db;
+    reg [31:0] s2_db_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s2_ff1    <= 1'b0;
+            s2_ff2    <= 1'b0;
+            s2_db     <= 1'b0;
+            s2_db_cnt <= 32'd0;
+        end
+        else begin
+            s2_ff1 <= sensor2;
+            s2_ff2 <= s2_ff1;
+
+            if (s2_ff2 == s2_db) begin
+                s2_db_cnt <= 32'd0;
+            end
+            else begin
+                if (s2_db_cnt == DB_MAX - 1) begin
+                    s2_db     <= s2_ff2;
+                    s2_db_cnt <= 32'd0;
+                end
+                else begin
+                    s2_db_cnt <= s2_db_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // One pulse
+    // =====================================================
+    reg s1_db_d, s2_db_d;
+    wire s1_pulse, s2_pulse;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s1_db_d <= 1'b0;
+            s2_db_d <= 1'b0;
+        end
+        else begin
+            s1_db_d <= s1_db;
+            s2_db_d <= s2_db;
+        end
+    end
+
+    assign s1_pulse = s1_db & ~s1_db_d;
+    assign s2_pulse = s2_db & ~s2_db_d;
+
+    // =====================================================
+    // 狀態機
+    // =====================================================
+    localparam IDLE       = 2'b00;  // 閘門關閉，待機
+    localparam CAR_ENTER  = 2'b01;  // 有人進入，等 Sensor2
+    localparam CAR_EXIT   = 2'b10;  // 有人離開，等 Sensor1
+
+    reg [1:0] state;
+    reg [2:0] count;   // 人數計數器，0~7（最大 111）
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            state <= IDLE;
+            count <= 3'd0;
+        end
+        else begin
+            case (state)
+                // =========================
+                // 待機狀態
+                // =========================
+                IDLE: begin
+                    // 進入：Sensor1 先觸發，且人數未滿
+                    if (s1_pulse && !s2_pulse && count < 3'b111) begin
+                        state <= CAR_ENTER;
+                    end
+                    // 離開：Sensor2 先觸發，且室內有人
+                    else if (s2_pulse && !s1_pulse && count > 3'd0) begin
+                        state <= CAR_EXIT;
+                    end
+                    else begin
+                        state <= IDLE;
+                    end
+                end
+
+                // =========================
+                // 有人進入，等 Sensor2 過去
+                // =========================
+                CAR_ENTER: begin
+                    if (s2_pulse) begin
+                        count <= count + 1'b1;
+                        state <= IDLE;
+                    end
+                    else begin
+                        state <= CAR_ENTER;
+                    end
+                end
+
+                // =========================
+                // 有人離開，等 Sensor1 過去
+                // =========================
+                CAR_EXIT: begin
+                    if (s1_pulse) begin
+                        count <= count - 1'b1;
+                        state <= IDLE;
+                    end
+                    else begin
+                        state <= CAR_EXIT;
+                    end
+                end
+
+                default: begin
+                    state <= IDLE;
+                end
+            endcase
+        end
+    end
+
+    // =====================================================
+    // LED 輸出
+    // LED3：閘門開關（進入或離開狀態時亮）
+    // LED2~LED0：人數顯示
+    // =====================================================
+    always @(*) begin
+        // 人數顯示
+        led0 = count[0];
+        led1 = count[1];
+        led2 = count[2];
+
+        // 閘門：進入或離開過程中開啟
+        case (state)
+            CAR_ENTER: led3 = 1'b1;
+            CAR_EXIT:  led3 = 1'b1;
+            default:   led3 = 1'b0;
+        endcase
+    end
+
+endmodule

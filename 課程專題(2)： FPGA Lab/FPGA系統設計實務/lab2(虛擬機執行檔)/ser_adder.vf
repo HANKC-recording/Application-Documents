@@ -1,0 +1,113 @@
+////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+////////////////////////////////////////////////////////////////////////////////
+//   ____  ____ 
+//  /   /\/   / 
+// /___/  \  /    Vendor: Xilinx 
+// \   \   \/     Version : 14.7
+//  \   \         Application : sch2hdl
+//  /   /         Filename : ser_adder.vf
+// /___/   /\     Timestamp : 03/08/2026 16:02:57
+// \   \  /  \ 
+//  \___\/\___\ 
+//
+//Command: sch2hdl -intstyle ise -family spartan6 -verilog /home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/ser_adder.vf -w /home/ise/Xilinx_VM_lab/lab2_4bits_full_adder/ser_adder.sch
+//Design Name: ser_adder
+//Device: spartan6
+//Purpose:
+//    This verilog netlist is translated from an ECS schematic.It can be 
+//    synthesized and simulated, but it should not be modified. 
+//
+`timescale 1ns / 1ps
+
+module full_adder_1bits_MUSER_ser_adder(A, 
+                                        B, 
+                                        Cin, 
+                                        Cout, 
+                                        Sum);
+
+    input A;
+    input B;
+    input Cin;
+   output Cout;
+   output Sum;
+   
+   wire XLXN_5;
+   wire XLXN_6;
+   wire XLXN_7;
+   
+   XOR3  XLXI_1 (.I0(Cin), 
+                .I1(B), 
+                .I2(A), 
+                .O(Sum));
+   AND2  XLXI_2 (.I0(B), 
+                .I1(A), 
+                .O(XLXN_6));
+   AND2  XLXI_3 (.I0(Cin), 
+                .I1(A), 
+                .O(XLXN_5));
+   AND2  XLXI_4 (.I0(Cin), 
+                .I1(B), 
+                .O(XLXN_7));
+   OR3  XLXI_5 (.I0(XLXN_7), 
+               .I1(XLXN_5), 
+               .I2(XLXN_6), 
+               .O(Cout));
+endmodule
+`timescale 1ns / 1ps
+
+module ser_adder(A0, 
+                 A1, 
+                 A2, 
+                 A3, 
+                 B0, 
+                 B1, 
+                 B2, 
+                 B3, 
+                 Cin, 
+                 Cout, 
+                 Sum0, 
+                 Sum1, 
+                 Sum2, 
+                 Sum3);
+
+    input A0;
+    input A1;
+    input A2;
+    input A3;
+    input B0;
+    input B1;
+    input B2;
+    input B3;
+    input Cin;
+   output Cout;
+   output Sum0;
+   output Sum1;
+   output Sum2;
+   output Sum3;
+   
+   wire XLXN_1;
+   wire XLXN_2;
+   wire XLXN_3;
+   
+   full_adder_1bits_MUSER_ser_adder  XLXI_1 (.A(A3), 
+                                            .B(B3), 
+                                            .Cin(XLXN_3), 
+                                            .Cout(Cout), 
+                                            .Sum(Sum3));
+   full_adder_1bits_MUSER_ser_adder  XLXI_2 (.A(A2), 
+                                            .B(B2), 
+                                            .Cin(XLXN_2), 
+                                            .Cout(XLXN_3), 
+                                            .Sum(Sum2));
+   full_adder_1bits_MUSER_ser_adder  XLXI_3 (.A(A1), 
+                                            .B(B1), 
+                                            .Cin(XLXN_1), 
+                                            .Cout(XLXN_2), 
+                                            .Sum(Sum1));
+   full_adder_1bits_MUSER_ser_adder  XLXI_4 (.A(A0), 
+                                            .B(B0), 
+                                            .Cin(Cin), 
+                                            .Cout(XLXN_1), 
+                                            .Sum(Sum0));
+endmodule

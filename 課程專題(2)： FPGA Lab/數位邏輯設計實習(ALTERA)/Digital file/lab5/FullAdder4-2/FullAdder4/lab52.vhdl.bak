@@ -1,0 +1,25 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
+entity FullAdder4 is
+    port(
+        A  : in  std_logic_vector(3 downto 0);
+        B  : in  std_logic_vector(3 downto 0);
+        Ci : in  std_logic;
+        S  : out std_logic_vector(3 downto 0)
+    );
+end FullAdder4;
+
+architecture Structure of FullAdder4 is
+    signal A_int, B_int, S_int : integer := 0;
+begin
+
+    A_int <= to_integer(unsigned(A));
+    B_int <= to_integer(unsigned(B));
+
+    S_int <= (A_int + B_int) when Ci = '0' else (A_int - B_int);
+
+    S <= std_logic_vector(to_unsigned(S_int, 4));
+
+end Structure;

@@ -1,0 +1,116 @@
+// =================================================================
+// Homework 2: 自動販賣機米利狀態機 (Mealy FSM)
+// 設計功能：模擬投入10/50元，並依據餘額決定是否吐出20/50元商品與找零
+// =================================================================
+
+module vending_machine (
+    // Input Ports
+    input clk,            // 系統時脈 (Clock)
+    input reset,          // 非同步重置訊號 (Active-High)
+    
+    input coin_10,        // 投幣輸入：投入 10 元硬幣
+    input coin_50,        // 投入 50 元
+    input buy_20,         // 按鈕輸入：購買 20 元商品
+    input buy_50,         // 購買 50 元商品
+    
+    // Output Ports
+    output reg item_20,   // 動作輸出：吐出 20 元商品 (1 代表執行)
+    output reg item_50,   // 動作輸出：吐出 50 元商品 (1 代表執行)
+    output reg change     // 動作輸出：找零錢訊號 (1 代表執行找零)
+);
+
+    // =============================================================
+    // State assignment (使用2 bits，對應4 個狀態)
+    // =============================================================
+    parameter S_START   = 2'b00; // 狀態 00：初始狀態 (目前累計餘額為 0 元)
+    parameter S_LESS    = 2'b01; // 狀態 01：錢貨不足 (目前累計餘額為 10 元)
+    parameter S_CAN_20  = 2'b10; // 狀態 10：可買20元 (目前累計餘額為 20 元)
+    parameter S_CAN_ALL = 2'b11; // 狀態 11：可買所有 (目前累計餘額為 50 元以上)
+
+    // 宣告current_state 與 next_state 的內部暫存器
+    reg [1:0] current_state, next_state;
+
+
+    // =============================================================
+    // 【Sequential Logic】
+    //  更新狀態。
+    //  當 reset 變為 1 強制歸零。
+    // =============================================================
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            current_state <= S_START;       // 高電位重置觸發：回到初始
+        else
+            current_state <= next_state;    // 一般情況，時脈正緣更新至下一狀態
+    end
+
+
+    // =============================================================
+    // 【Combinational Logic】
+    //  根據「目前狀態」與「外部投幣輸入」，即時算出「下一狀態」(Mealy)
+    // =============================================================
+    always @(*) begin
+        next_state = current_state;     // 預設維持原狀態，防止合成出非預期 Latch
+        
+        case (current_state)
+            //  情況 00：目前餘額 0 元 
+            S_START: begin
+                if (coin_10)      next_state = S_LESS;      // 投 10 元 -> 餘額 10 元 -> 跳到「錢不足」
+                else if (coin_50) next_state = S_CAN_ALL;   // 直接投 50 元 -> 餘額 50 元 -> 跳到「可買所有」
+            end
+            
+            //  情況 01：目前餘額 10 元 
+            S_LESS: begin
+                if (coin_10)      next_state = S_CAN_20;    // 再投 10 元 -> 累計 20 元 -> 跳到「可買20元」
+                else if (coin_50) next_state = S_CAN_ALL;   // 再投 50 元 -> 累計 60 元 -> 跳到「可買所有」
+            end
+            
+            // 情況 10：目前餘額 20 元 
+            S_CAN_20: begin
+                if (buy_20)       next_state = S_START;     // 買 20 元商品 -> 售出，餘額清空回起點
+            end
+            
+            //  情況 11：目前餘額 50 元以上
+            S_CAN_ALL: begin
+                if (buy_20 || buy_50) next_state = S_START; // 按下任一商品 -> 售出，餘額清空回起點
+            end
+            
+            // 防止非預期狀態
+            default: next_state = S_START; // 防止未知狀態，強迫回起點
+        endcase
+    end
+
+
+    // =============================================================
+    // 【Sequential Output Logic】
+    //  在 posedge clk 或 posedge reset 時決定出貨與找零。
+    // =============================================================
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            // 當 reset 為 1 時，非同步強制關閉所有商品輸出與找零動作
+            item_20 <= 1'b0;
+            item_50 <= 1'b0;
+            change  <= 1'b0;
+
+        end else begin
+            // 清零：將輸出初始化
+            item_20 <= 1'b0;
+            item_50 <= 1'b0;
+            change  <= 1'b0;
+            
+            // 判定 1：若累計達 20 元且按下購買 20 元商品
+            if (current_state == S_CAN_20 && buy_20) begin
+                item_20 <= 1'b1;        // 給出 20 元商品，不需找零
+                
+            // 判定 2：若累計達 50 元以上
+            end else if (current_state == S_CAN_ALL) begin
+                if (buy_50) begin
+                    item_50 <= 1'b1;    // 選擇 50 元商品 -> 給出 50 元商品
+                end else if (buy_20) begin
+                    item_20 <= 1'b1;    // 選擇 20 元商品 -> 給出 20 元商品
+                    change  <= 1'b1;    // 存了50元以上卻買20元，同步拉高「找零錢」
+                end
+            end
+        end
+    end
+
+endmodule

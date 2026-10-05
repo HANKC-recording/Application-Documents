@@ -1,0 +1,412 @@
+Release 14.7 - xst P.20131013 (lin64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+--> 
+Parameter TMPDIR set to xst/projnav.tmp
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.00 secs
+ 
+--> 
+Parameter xsthdpdir set to xst
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.00 secs
+ 
+--> 
+Reading design: ALU8bit.prj
+
+TABLE OF CONTENTS
+  1) Synthesis Options Summary
+  2) HDL Parsing
+  3) HDL Elaboration
+  4) HDL Synthesis
+       4.1) HDL Synthesis Report
+  5) Advanced HDL Synthesis
+       5.1) Advanced HDL Synthesis Report
+  6) Low Level Synthesis
+  7) Partition Report
+  8) Design Summary
+       8.1) Primitive and Black Box Usage
+       8.2) Device utilization summary
+       8.3) Partition Resource Summary
+       8.4) Timing Report
+            8.4.1) Clock Information
+            8.4.2) Asynchronous Control Signals Information
+            8.4.3) Timing Summary
+            8.4.4) Timing Details
+            8.4.5) Cross Clock Domains Report
+
+
+=========================================================================
+*                      Synthesis Options Summary                        *
+=========================================================================
+---- Source Parameters
+Input File Name                    : "ALU8bit.prj"
+Ignore Synthesis Constraint File   : NO
+
+---- Target Parameters
+Output File Name                   : "ALU8bit"
+Output Format                      : NGC
+Target Device                      : xc6slx16-3-csg324
+
+---- Source Options
+Top Module Name                    : ALU8bit
+Automatic FSM Extraction           : YES
+FSM Encoding Algorithm             : Auto
+Safe Implementation                : No
+FSM Style                          : LUT
+RAM Extraction                     : Yes
+RAM Style                          : Auto
+ROM Extraction                     : Yes
+Shift Register Extraction          : YES
+ROM Style                          : Auto
+Resource Sharing                   : YES
+Asynchronous To Synchronous        : NO
+Shift Register Minimum Size        : 2
+Use DSP Block                      : Auto
+Automatic Register Balancing       : No
+
+---- Target Options
+LUT Combining                      : Auto
+Reduce Control Sets                : Auto
+Add IO Buffers                     : YES
+Global Maximum Fanout              : 100000
+Add Generic Clock Buffer(BUFG)     : 16
+Register Duplication               : YES
+Optimize Instantiated Primitives   : NO
+Use Clock Enable                   : Auto
+Use Synchronous Set                : Auto
+Use Synchronous Reset              : Auto
+Pack IO Registers into IOBs        : Auto
+Equivalent register Removal        : YES
+
+---- General Options
+Optimization Goal                  : Speed
+Optimization Effort                : 1
+Power Reduction                    : NO
+Keep Hierarchy                     : No
+Netlist Hierarchy                  : As_Optimized
+RTL Output                         : Yes
+Global Optimization                : AllClockNets
+Read Cores                         : YES
+Write Timing Constraints           : NO
+Cross Clock Analysis               : NO
+Hierarchy Separator                : /
+Bus Delimiter                      : <>
+Case Specifier                     : Maintain
+Slice Utilization Ratio            : 100
+BRAM Utilization Ratio             : 100
+DSP48 Utilization Ratio            : 100
+Auto BRAM Packing                  : NO
+Slice Utilization Ratio Delta      : 5
+
+=========================================================================
+
+
+=========================================================================
+*                          HDL Parsing                                  *
+=========================================================================
+Analyzing Verilog file "/home/ise/Xilinx_VM_lab/CO_ALU/ALU.v" into library work
+Parsing module <ALU8bit>.
+
+=========================================================================
+*                            HDL Elaboration                            *
+=========================================================================
+
+Elaborating module <ALU8bit>.
+
+=========================================================================
+*                           HDL Synthesis                               *
+=========================================================================
+
+Synthesizing Unit <ALU8bit>.
+    Related source file is "/home/ise/Xilinx_VM_lab/CO_ALU/ALU.v".
+        ADD = 4'b0000
+        ADDC = 4'b0001
+        SUB = 4'b0010
+        SUBB = 4'b0011
+        DEC = 4'b0100
+        INC = 4'b0101
+        TRA = 4'b0110
+        AND = 4'b0111
+        OR = 4'b1000
+        XOR = 4'b1001
+        NOT = 4'b1010
+        SHL = 4'b1011
+        SHR = 4'b1100
+    Found 9-bit subtractor for signal <n0092[8:0]> created at line 62.
+    Found 16-bit subtractor for signal <GND_1_o_GND_1_o_sub_13_OUT> created at line 62.
+    Found 9-bit subtractor for signal <GND_1_o_GND_1_o_sub_16_OUT> created at line 68.
+    Found 9-bit adder for signal <_n0161> created at line 50.
+    Found 10-bit adder for signal <_n0170> created at line 50.
+    Found 9-bit adder for signal <_n0167> created at line 74.
+    Found 16-bit 15-to-1 multiplexer for signal <Result> created at line 13.
+    Found 1-bit 13-to-1 multiplexer for signal <GND_1_o_BUS_0001_MUX_53_o> created at line 49.
+    Found 1-bit 15-to-1 multiplexer for signal <flagZ> created at line 15.
+WARNING:Xst:737 - Found 1-bit latch for signal <flagC>. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.
+    Summary:
+	inferred   6 Adder/Subtractor(s).
+	inferred   1 Latch(s).
+	inferred   3 Multiplexer(s).
+Unit <ALU8bit> synthesized.
+
+=========================================================================
+HDL Synthesis Report
+
+Macro Statistics
+# Adders/Subtractors                                   : 6
+ 10-bit adder                                          : 1
+ 16-bit subtractor                                     : 1
+ 9-bit adder                                           : 2
+ 9-bit subtractor                                      : 2
+# Latches                                              : 1
+ 1-bit latch                                           : 1
+# Multiplexers                                         : 3
+ 1-bit 13-to-1 multiplexer                             : 1
+ 1-bit 15-to-1 multiplexer                             : 1
+ 16-bit 15-to-1 multiplexer                            : 1
+# Xors                                                 : 1
+ 16-bit xor2                                           : 1
+
+=========================================================================
+
+=========================================================================
+*                       Advanced HDL Synthesis                          *
+=========================================================================
+
+
+=========================================================================
+Advanced HDL Synthesis Report
+
+Macro Statistics
+# Adders/Subtractors                                   : 6
+ 10-bit adder                                          : 1
+ 16-bit subtractor                                     : 1
+ 9-bit adder                                           : 2
+ 9-bit subtractor                                      : 2
+# Multiplexers                                         : 3
+ 1-bit 13-to-1 multiplexer                             : 1
+ 1-bit 15-to-1 multiplexer                             : 1
+ 16-bit 15-to-1 multiplexer                            : 1
+# Xors                                                 : 1
+ 16-bit xor2                                           : 1
+
+=========================================================================
+
+=========================================================================
+*                         Low Level Synthesis                           *
+=========================================================================
+
+Optimizing unit <ALU8bit> ...
+
+Mapping all equations...
+Building and optimizing final netlist ...
+Found area constraint ratio of 100 (+ 5) on block ALU8bit, actual ratio is 2.
+
+Final Macro Processing ...
+
+=========================================================================
+Final Register Report
+
+Found no macro
+=========================================================================
+
+=========================================================================
+*                           Partition Report                            *
+=========================================================================
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+=========================================================================
+*                            Design Summary                             *
+=========================================================================
+
+Top Level Output File Name         : ALU8bit.ngc
+
+Primitive and Black Box Usage:
+------------------------------
+# BELS                             : 163
+#      GND                         : 1
+#      LUT2                        : 34
+#      LUT3                        : 15
+#      LUT4                        : 8
+#      LUT5                        : 18
+#      LUT6                        : 50
+#      MUXCY                       : 16
+#      MUXF7                       : 3
+#      VCC                         : 1
+#      XORCY                       : 17
+# FlipFlops/Latches                : 1
+#      LD                          : 1
+# IO Buffers                       : 39
+#      IBUF                        : 21
+#      OBUF                        : 18
+
+Device utilization summary:
+---------------------------
+
+Selected Device : 6slx16csg324-3 
+
+
+Slice Logic Utilization: 
+ Number of Slice LUTs:                  125  out of   9112     1%  
+    Number used as Logic:               125  out of   9112     1%  
+
+Slice Logic Distribution: 
+ Number of LUT Flip Flop pairs used:    125
+   Number with an unused Flip Flop:     125  out of    125   100%  
+   Number with an unused LUT:             0  out of    125     0%  
+   Number of fully used LUT-FF pairs:     0  out of    125     0%  
+   Number of unique control sets:         1
+
+IO Utilization: 
+ Number of IOs:                          39
+ Number of bonded IOBs:                  39  out of    232    16%  
+    IOB Flip Flops/Latches:               1
+
+Specific Feature Utilization:
+
+---------------------------
+Partition Resource Summary:
+---------------------------
+
+  No Partitions were found in this design.
+
+---------------------------
+
+
+=========================================================================
+Timing Report
+
+NOTE: THESE TIMING NUMBERS ARE ONLY A SYNTHESIS ESTIMATE.
+      FOR ACCURATE TIMING INFORMATION PLEASE REFER TO THE TRACE REPORT
+      GENERATED AFTER PLACE-and-ROUTE.
+
+Clock Information:
+------------------
+-----------------------------------------------------------+------------------------+-------+
+Clock Signal                                               | Clock buffer(FF name)  | Load  |
+-----------------------------------------------------------+------------------------+-------+
+Opcode[3]_Opcode[3]_OR_41_o(Opcode[3]_Opcode[3]_OR_41_o1:O)| NONE(*)(flagC)         | 1     |
+-----------------------------------------------------------+------------------------+-------+
+(*) This 1 clock signal(s) are generated by combinatorial logic,
+and XST is not able to identify which are the primary clock signals.
+Please use the CLOCK_SIGNAL constraint to specify the clock signal(s) generated by combinatorial logic.
+INFO:Xst:2169 - HDL ADVISOR - Some clock signals were not automatically buffered by XST with BUFG/BUFR resources. Please use the buffer_type constraint in order to insert these buffers to the clock signals to help prevent skew problems.
+
+Asynchronous Control Signals Information:
+----------------------------------------
+No asynchronous control signals found in this design
+
+Timing Summary:
+---------------
+Speed Grade: -3
+
+   Minimum period: No path found
+   Minimum input arrival time before clock: 7.292ns
+   Maximum output required time after clock: 3.648ns
+   Maximum combinational path delay: 11.457ns
+
+Timing Details:
+---------------
+All values displayed in nanoseconds (ns)
+
+=========================================================================
+Timing constraint: Default OFFSET IN BEFORE for Clock 'Opcode[3]_Opcode[3]_OR_41_o'
+  Total number of paths / destination ports: 293 / 1
+-------------------------------------------------------------------------
+Offset:              7.292ns (Levels of Logic = 9)
+  Source:            Operand1<0> (PAD)
+  Destination:       flagC (LATCH)
+  Destination Clock: Opcode[3]_Opcode[3]_OR_41_o falling
+
+  Data Path: Operand1<0> to flagC
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     IBUF:I->O            21   1.222   1.218  Operand1_0_IBUF (Madd__n0167_cy<0>)
+     LUT2:I0->O            1   0.203   0.000  Msub_n0092[8:0]_lut<0> (Msub_n0092[8:0]_lut<0>)
+     MUXCY:S->O            1   0.172   0.000  Msub_n0092[8:0]_cy<0> (Msub_n0092[8:0]_cy<0>)
+     XORCY:CI->O           7   0.180   1.021  Msub_n0092[8:0]_xor<1> (n0092[8:0]<1>)
+     LUT6:I2->O            4   0.203   0.788  Msub_GND_1_o_GND_1_o_sub_13_OUT_cy<4>11 (Msub_GND_1_o_GND_1_o_sub_13_OUT_cy<4>)
+     LUT3:I1->O            3   0.203   0.879  Msub_GND_1_o_GND_1_o_sub_13_OUT_cy<6>11 (Msub_GND_1_o_GND_1_o_sub_13_OUT_cy<6>)
+     LUT6:I3->O            1   0.205   0.000  Mmux_GND_1_o_BUS_0001_MUX_53_o5_G (N43)
+     MUXF7:I1->O           2   0.140   0.617  Mmux_GND_1_o_BUS_0001_MUX_53_o5 (Mmux_GND_1_o_BUS_0001_MUX_53_o)
+     LUT3:I2->O            1   0.205   0.000  Mmux_GND_1_o_BUS_0001_MUX_53_o2 (GND_1_o_BUS_0001_MUX_53_o)
+     LD:D                      0.037          flagC
+    ----------------------------------------
+    Total                      7.292ns (2.770ns logic, 4.522ns route)
+                                       (38.0% logic, 62.0% route)
+
+=========================================================================
+Timing constraint: Default OFFSET OUT AFTER for Clock 'Opcode[3]_Opcode[3]_OR_41_o'
+  Total number of paths / destination ports: 1 / 1
+-------------------------------------------------------------------------
+Offset:              3.648ns (Levels of Logic = 1)
+  Source:            flagC (LATCH)
+  Destination:       flagC (PAD)
+  Source Clock:      Opcode[3]_Opcode[3]_OR_41_o falling
+
+  Data Path: flagC to flagC
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     LD:G->Q               1   0.498   0.579  flagC (flagC_OBUF)
+     OBUF:I->O                 2.571          flagC_OBUF (flagC)
+    ----------------------------------------
+    Total                      3.648ns (3.069ns logic, 0.579ns route)
+                                       (84.1% logic, 15.9% route)
+
+=========================================================================
+Timing constraint: Default path analysis
+  Total number of paths / destination ports: 2884 / 17
+-------------------------------------------------------------------------
+Delay:               11.457ns (Levels of Logic = 10)
+  Source:            Operand1<0> (PAD)
+  Destination:       flagZ (PAD)
+
+  Data Path: Operand1<0> to flagZ
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     IBUF:I->O            21   1.222   1.218  Operand1_0_IBUF (Madd__n0167_cy<0>)
+     LUT2:I0->O            1   0.203   0.000  Msub_n0092[8:0]_lut<0> (Msub_n0092[8:0]_lut<0>)
+     MUXCY:S->O            1   0.172   0.000  Msub_n0092[8:0]_cy<0> (Msub_n0092[8:0]_cy<0>)
+     XORCY:CI->O           7   0.180   1.002  Msub_n0092[8:0]_xor<1> (n0092[8:0]<1>)
+     LUT3:I0->O            2   0.205   0.961  Msub_GND_1_o_GND_1_o_sub_13_OUT_xor<1>11 (GND_1_o_GND_1_o_sub_13_OUT<1>)
+     LUT6:I1->O            1   0.203   0.924  GND_1_o_GND_1_o_equal_14_o<15>_SW1 (N36)
+     LUT6:I1->O            1   0.203   0.827  GND_1_o_GND_1_o_equal_14_o<15> (GND_1_o_GND_1_o_equal_14_o)
+     LUT6:I2->O            1   0.203   0.580  Mmux_flagZ_6 (Mmux_flagZ_6)
+     LUT6:I5->O            1   0.205   0.579  Opcode<3>7 (flagZ_OBUF)
+     OBUF:I->O                 2.571          flagZ_OBUF (flagZ)
+    ----------------------------------------
+    Total                     11.457ns (5.367ns logic, 6.090ns route)
+                                       (46.8% logic, 53.2% route)
+
+=========================================================================
+
+Cross Clock Domains Report:
+--------------------------
+
+=========================================================================
+
+
+Total REAL time to Xst completion: 3.00 secs
+Total CPU time to Xst completion: 0.70 secs
+ 
+--> 
+
+
+Total memory usage is 475592 kilobytes
+
+Number of errors   :    0 (   0 filtered)
+Number of warnings :    1 (   0 filtered)
+Number of infos    :    1 (   0 filtered)
+

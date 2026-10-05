@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>mealy</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,x</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library ieee;
+use ieee.std_logic_1164.all;
+
+entity mealy is	
+	port (
+		-- Input ports
+		clk, x : in  std_logic;
+		-- Output ports		
+		y      : out std_logic;  -- 修正：補上分號
+		z      : out std_logic_vector(2 downto 0)
+	);
+end mealy;
+
+architecture state_graph of mealy is
+    -- 必須宣告一個內部信號來存儲狀態，因為 out 腳位不能被讀取
+    signal z_internal : std_logic_vector(2 downto 0) := &quot;000&quot;;
+begin
+    -- 【新增】：將內部狀態信號即時輸出給腳位 z
+    z &lt;= z_internal;
+
+    -- 以下的邏輯判斷，全部改用內部信號 z_internal
+    y &lt;= &apos;1&apos; when (z_internal = &quot;010&quot; and x = &apos;1&apos;) or (z_internal = &quot;100&quot; and x = &apos;1&apos;) else &apos;0&apos;;
+
+    process(clk) is
+    begin
+        if(rising_edge(clk)) then
+            if(z_internal = &quot;000&quot;) then         -- 當前狀態 S0
+                if(x = &apos;0&apos;) then 
+                    z_internal &lt;= &quot;001&quot;;        -- x=0 跳至 S1
+                else 
+                    z_internal &lt;= &quot;011&quot;;        -- x=1 跳至 S3
+                end if;
+                
+            elsif(z_internal = &quot;001&quot;) then      -- 當前狀態 S1
+                if(x = &apos;0&apos;) then 
+                    z_internal &lt;= &quot;010&quot;;        -- x=0 跳至 S2
+                else 
+                    z_internal &lt;= &quot;011&quot;;        -- x=1 跳至 S3
+                end if;
+                
+            elsif(z_internal = &quot;010&quot;) then      -- 當前狀態 S2
+                if(x = &apos;0&apos;) then 
+                    z_internal &lt;= &quot;001&quot;;        -- x=0 跳至 S1
+                else 
+                    z_internal &lt;= &quot;011&quot;;        -- x=1 跳至 S3
+                end if;
+                
+            elsif(z_internal = &quot;011&quot;) then      -- 當前狀態 S3
+                if(x = &apos;0&apos;) then 
+                    z_internal &lt;= &quot;100&quot;;        -- x=0 跳至 S4
+                else 
+                    z_internal &lt;= &quot;000&quot;;        -- x=1 跳至 S0
+                end if;
+                
+            elsif(z_internal = &quot;100&quot;) then      -- 當前狀態 S4
+                if(x = &apos;0&apos;) then 
+                    z_internal &lt;= &quot;011&quot;;        -- x=0 跳至 S3
+                else 
+                    z_internal &lt;= &quot;000&quot;;        -- x=1 跳至 S0
+                end if;
+                
+            else
+                z_internal &lt;= &quot;000&quot;;            -- 預防未知狀態，拉回 S0
+            end if;
+        end if;
+    end process;
+end state_graph;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>y,z:3</string>
+        </entry>
+      </elementAttributes>
+      <pos x="500" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>z</string>
+        </entry>
+      </elementAttributes>
+      <pos x="800" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>clk</string>
+        </entry>
+      </elementAttributes>
+      <pos x="320" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>x</string>
+        </entry>
+      </elementAttributes>
+      <pos x="360" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Data</elementName>
+      <elementAttributes/>
+      <pos x="280" y="-160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Splitter</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Input Splitting</string>
+          <string>3</string>
+        </entry>
+        <entry>
+          <string>splitterSpreading</string>
+          <int>2</int>
+        </entry>
+        <entry>
+          <string>Output Splitting</string>
+          <string>1,1,1</string>
+        </entry>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+      </elementAttributes>
+      <pos x="740" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S1</string>
+        </entry>
+      </elementAttributes>
+      <pos x="740" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S2</string>
+        </entry>
+      </elementAttributes>
+      <pos x="700" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S3</string>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="420"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="320" y="260"/>
+      <p2 x="500" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="560" y="260"/>
+      <p2 x="800" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="280"/>
+      <p2 x="500" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="560" y="280"/>
+      <p2 x="740" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="320" y="200"/>
+      <p2 x="320" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="800" y="260"/>
+      <p2 x="800" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="740" y="280"/>
+      <p2 x="740" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="200"/>
+      <p2 x="360" y="280"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

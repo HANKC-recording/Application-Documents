@@ -1,0 +1,34 @@
+ISim log file
+Running: /home/ise/Xilinx_VM_lab/CO_ALU/ALU8bit_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/ise/Xilinx_VM_lab/CO_ALU/ALU8bit_tb_isim_beh.wdb 
+ISim P.20131013 (signature 0xfbc00daa)
+----------------------------------------------------------------------
+WARNING:Security:42 - Your software subscription period has lapsed. Your current version of Xilinx tools will continue to function, but you no longer qualify for Xilinx software updates or new releases.
+
+
+----------------------------------------------------------------------
+This is a Full version of ISim.
+Time resolution is 1 ps
+# onerror resume
+# wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+-------------------------------------------------------------------------------------------------------
+ 時間(Time) | Opcode | Operand1 (十六/十進位) | Operand2 (十六/十進位) | Cin =>  Result (十六進位) |  C  |  Z 
+-------------------------------------------------------------------------------------------------------
+Finished circuit initialization process.
+                   0 ns |  0000  |    00    (0)     |    00    (0)     |  0  =>      0000        |  0  |  1 
+              100000 ns |  0000  |    aa    (170)     |    55    (85)     |  1  =>      00ff        |  0  |  0 
+              120000 ns |  0001  |    aa    (170)     |    55    (85)     |  1  =>      0100        |  1  |  0 
+              140000 ns |  0010  |    aa    (170)     |    55    (85)     |  1  =>      0055        |  0  |  0 
+              160000 ns |  0011  |    aa    (170)     |    55    (85)     |  1  =>      0054        |  0  |  0 
+              180000 ns |  0100  |    aa    (170)     |    55    (85)     |  1  =>      00a9        |  0  |  0 
+              200000 ns |  0101  |    aa    (170)     |    55    (85)     |  1  =>      00ab        |  0  |  0 
+              220000 ns |  0110  |    aa    (170)     |    55    (85)     |  1  =>      00aa        |  0  |  0 
+              240000 ns |  0111  |    aa    (170)     |    55    (85)     |  1  =>      0000        |  0  |  1 
+              260000 ns |  1000  |    aa    (170)     |    55    (85)     |  1  =>      00ff        |  0  |  0 
+              280000 ns |  1001  |    aa    (170)     |    55    (85)     |  1  =>      00ff        |  0  |  0 
+              300000 ns |  1010  |    aa    (170)     |    55    (85)     |  1  =>      ff55        |  0  |  0 
+              320000 ns |  1011  |    aa    (170)     |    55    (85)     |  1  =>      0154        |  1  |  0 
+              340000 ns |  1100  |    aa    (170)     |    55    (85)     |  1  =>      0055        |  0  |  0 
+Stopped at time : 360 ns : File "/home/ise/Xilinx_VM_lab/CO_ALU/ALU_tb.v" Line 52
+# exit 0

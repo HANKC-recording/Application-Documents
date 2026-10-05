@@ -1,0 +1,218 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Clock: 27MHz
+// DB_MAX 計算: 27,000,000 × 0.02 - 1 = 539,999 (20ms debounce)
+//////////////////////////////////////////////////////////////////////////////////
+module simple_gate(
+    input  wire clk,
+    input  wire reset,
+
+    input  wire sensor1,   // PB1，入口感測器
+    input  wire sensor2,   // PB2，出口感測器
+
+    output reg led0,
+    output reg led1,
+    output reg led2,
+    output reg led3
+    );
+
+    // =====================================================
+    // Debounce 參數
+    // clk = 27MHz，週期 = 37.037ns
+    // 20ms = 27,000,000 × 0.02 - 1 = 539,999
+    // =====================================================
+    parameter DB_MAX = 539999;
+
+    // =====================================================
+    // Sensor1 debounce
+    // =====================================================
+    reg s1_ff1;
+    reg s1_ff2;
+    reg s1_db;
+    reg [31:0] s1_db_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s1_ff1    <= 1'b0;
+            s1_ff2    <= 1'b0;
+            s1_db     <= 1'b0;
+            s1_db_cnt <= 32'd0;
+        end
+        else begin
+            s1_ff1 <= sensor1;
+            s1_ff2 <= s1_ff1;
+
+            if (s1_ff2 == s1_db) begin
+                s1_db_cnt <= 32'd0;
+            end
+            else begin
+                if (s1_db_cnt == DB_MAX - 1) begin  // 用 == 避免溢位跳過
+                    s1_db     <= s1_ff2;
+                    s1_db_cnt <= 32'd0;
+                end
+                else begin
+                    s1_db_cnt <= s1_db_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // Sensor2 debounce
+    // =====================================================
+    reg s2_ff1;
+    reg s2_ff2;
+    reg s2_db;
+    reg [31:0] s2_db_cnt;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s2_ff1    <= 1'b0;
+            s2_ff2    <= 1'b0;
+            s2_db     <= 1'b0;
+            s2_db_cnt <= 32'd0;
+        end
+        else begin
+            s2_ff1 <= sensor2;
+            s2_ff2 <= s2_ff1;
+
+            if (s2_ff2 == s2_db) begin
+                s2_db_cnt <= 32'd0;
+            end
+            else begin
+                if (s2_db_cnt == DB_MAX - 1) begin  // 用 == 避免溢位跳過
+                    s2_db     <= s2_ff2;
+                    s2_db_cnt <= 32'd0;
+                end
+                else begin
+                    s2_db_cnt <= s2_db_cnt + 1'b1;
+                end
+            end
+        end
+    end
+
+    // =====================================================
+    // One pulse
+    // 感測器從 0 變 1 時，只產生一拍 pulse
+    // =====================================================
+    reg s1_db_d;
+    reg s2_db_d;
+
+    wire s1_pulse;
+    wire s2_pulse;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            s1_db_d <= 1'b0;
+            s2_db_d <= 1'b0;
+        end
+        else begin
+            s1_db_d <= s1_db;
+            s2_db_d <= s2_db;
+        end
+    end
+
+    assign s1_pulse = s1_db & ~s1_db_d;
+    assign s2_pulse = s2_db & ~s2_db_d;
+
+    // =====================================================
+    // 狀態機
+    // =====================================================
+    localparam GATE_CLOSE = 2'b00;  // 閘門關閉
+    localparam CAR_ENTER  = 2'b01;  // 車子從 Sensor1 進入，等待 Sensor2
+    localparam CAR_EXIT   = 2'b10;  // 車子從 Sensor2 離開，等待 Sensor1
+
+    reg [1:0] state;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            state <= GATE_CLOSE;
+        end
+        else begin
+            case (state)
+                // =========================
+                // 閘門關閉狀態
+                // =========================
+                GATE_CLOSE: begin
+                    if (s1_pulse && !s2_pulse) begin
+                        state <= CAR_ENTER;
+                    end
+                    else if (s2_pulse && !s1_pulse) begin
+                        state <= CAR_EXIT;
+                    end
+                    else begin
+                        state <= GATE_CLOSE;
+                    end
+                end
+
+                // =========================
+                // 車子進入停車場
+                // Sensor1 先觸發，等 Sensor2
+                // =========================
+                CAR_ENTER: begin
+                    if (s2_pulse) begin
+                        state <= GATE_CLOSE;
+                    end
+                    else begin
+                        state <= CAR_ENTER;
+                    end
+                end
+
+                // =========================
+                // 車子離開停車場
+                // Sensor2 先觸發，等 Sensor1
+                // =========================
+                CAR_EXIT: begin
+                    if (s1_pulse) begin
+                        state <= GATE_CLOSE;
+                    end
+                    else begin
+                        state <= CAR_EXIT;
+                    end
+                end
+
+                default: begin
+                    state <= GATE_CLOSE;
+                end
+            endcase
+        end
+    end
+
+    // =====================================================
+    // LED 輸出控制
+    // 閘門開啟：LED3~LED0 全亮
+    // 閘門關閉：LED3~LED0 全滅
+    // =====================================================
+    always @(*) begin
+        case (state)
+            GATE_CLOSE: begin
+                led3 = 1'b0;
+                led2 = 1'b0;
+                led1 = 1'b0;
+                led0 = 1'b0;
+            end
+
+            CAR_ENTER: begin
+                led3 = 1'b1;
+                led2 = 1'b1;
+                led1 = 1'b1;
+                led0 = 1'b1;
+            end
+
+            CAR_EXIT: begin
+                led3 = 1'b1;
+                led2 = 1'b1;
+                led1 = 1'b1;
+                led0 = 1'b1;
+            end
+
+            default: begin
+                led3 = 1'b0;
+                led2 = 1'b0;
+                led1 = 1'b0;
+                led0 = 1'b0;
+            end
+        endcase
+    end
+
+endmodule

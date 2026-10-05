@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>BCD_Detector</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,X</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity BCD_Detector is
+    Port ( 
+        clk        : in  STD_LOGIC;
+        X          : in  STD_LOGIC;                    -- 修改：改回 1-bit 序列輸入
+        Z          : out STD_LOGIC;
+        state_bits : out STD_LOGIC_VECTOR(1 downto 0)  -- 保持：2-bit 狀態編碼輸出
+    );
+end BCD_Detector;
+
+architecture Behavioral of BCD_Detector is
+    type state_type is (S0, S1, S2, S3);
+    signal current_state : state_type := S0;
+    signal next_state    : state_type;
+    
+    -- 新增：用來依序儲存前 3 個輸入 bit 的內部暫存器
+    signal temp_reg      : STD_LOGIC_VECTOR(2 downto 0) := &quot;000&quot;;
+    -- 新增：用來把前 3 個 bit 與目前的第 4 個 bit (X) 拼成 4-bit 向量
+    signal full_vector   : STD_LOGIC_VECTOR(3 downto 0);
+begin
+
+    -- 同步邏輯：負責狀態轉換，以及在每個時脈正緣把輸入的 1-bit X 存下來
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            current_state &lt;= next_state;
+            
+            -- 依據當前狀態，把輸入的 1-bit 依序存入 temp_reg
+            case current_state is
+                when S0 =&gt;
+                    temp_reg(2) &lt;= X; -- 存下第 1 個輸入的 bit
+                when S1 =&gt;
+                    temp_reg(1) &lt;= X; -- 存下第 2 個輸入的 bit
+                when S2 =&gt;
+                    temp_reg(0) &lt;= X; -- 存下第 3 個輸入的 bit
+                when others =&gt;
+                    null;             -- S3 時不需要再存，因為第 4 個 bit 直接由當前的 X 參與判斷
+            end case;
+        end if;
+    end process;
+
+
+    -- =================【注意：輸入順序設定】=================
+    -- 預設以下為「MSB 高位元先輸入」的拼法（最常見）：
+    full_vector &lt;= temp_reg(2) &amp; temp_reg(1) &amp; temp_reg(0) &amp; X;
+    
+    -- 備註：如果你們實驗講義或老師規定是「LSB 低位元先輸入」，請把上面這行改成：
+    -- full_vector &lt;= X &amp; temp_reg(2) &amp; temp_reg(1) &amp; temp_reg(0);
+    -- =======================================================
+
+
+    -- 組合邏輯：決定下一個狀態、輸出 Z、以及狀態燈號 state_bits
+    process(current_state, X, full_vector)
+    begin
+        -- 賦予預設值，防止電路產生不必要的 Latch (鎖存器)
+        Z          &lt;= &apos;0&apos;;
+        next_state &lt;= current_state;
+        state_bits &lt;= &quot;00&quot;;
+
+        case current_state is
+            when S0 =&gt;
+                next_state &lt;= S1;
+                state_bits &lt;= &quot;00&quot;;
+
+            when S1 =&gt;
+                next_state &lt;= S2;
+                state_bits &lt;= &quot;01&quot;;
+
+            when S2 =&gt;
+                next_state &lt;= S3;
+                state_bits &lt;= &quot;10&quot;;
+
+            when S3 =&gt;
+                next_state &lt;= S0; -- 第 4 次觸發後，自動回到 S0 循環重置
+                state_bits &lt;= &quot;11&quot;;
+                
+                -- 在第 4 個狀態（S3）且收到最後一個 bit 的當下，進行 BCD 碼判定
+                if full_vector &lt;= &quot;1001&quot; then
+                    Z &lt;= &apos;1&apos;; -- 0000 ~ 1001 (0~9) 為合法的 BCD 碼，輸出 1
+                else
+                    Z &lt;= &apos;0&apos;; -- 1010 ~ 1111 (10~15) 為非法，輸出 0
+                end if;
+
+            when others =&gt;
+                next_state &lt;= S0;
+                state_bits &lt;= &quot;00&quot;;
+                Z          &lt;= &apos;0&apos;;
+        end case;
+    end process;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>Z,state_bits:2</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>6</int>
+        </entry>
+        <entry>
+          <string>Code_File</string>
+          <string>C:\Users\User-010855\Desktop\lab10\BCDEC.vhdl</string>
+        </entry>
+      </elementAttributes>
+      <pos x="640" y="380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="500" y="340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>X</string>
+        </entry>
+      </elementAttributes>
+      <pos x="560" y="340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Z</string>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
+        </entry>
+      </elementAttributes>
+      <pos x="800" y="560"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>2</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+      </elementAttributes>
+      <pos x="880" y="560"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="560" y="400"/>
+      <p2 x="640" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="760" y="400"/>
+      <p2 x="880" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="380"/>
+      <p2 x="640" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="760" y="380"/>
+      <p2 x="800" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="560" y="340"/>
+      <p2 x="560" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="800" y="380"/>
+      <p2 x="800" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="880" y="400"/>
+      <p2 x="880" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="340"/>
+      <p2 x="500" y="380"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

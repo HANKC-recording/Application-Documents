@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>state_machine</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,x</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity state_machine is
+    port (
+        clk   : in  std_logic;
+        x     : in  std_logic;
+        z     : out std_logic;
+        q_out : out std_logic_vector(2 downto 0) -- 輸出當前狀態 (Q2 Q1 Q0)
+    );
+end entity state_machine;
+
+architecture rtl of state_machine is
+
+    -- 狀態暫存器 (3 bits)，給予初始值 &quot;000&quot; (S0)
+    signal Q : std_logic_vector(2 downto 0) := &quot;000&quot;;
+
+    -- 為了提高可讀性，使用別名 (Alias) 對應到暫存器位元
+    alias Q2 : std_logic is Q(2);
+    alias Q1 : std_logic is Q(1);
+    alias Q0 : std_logic is Q(0);
+
+    -- 次態連線 (Next state wires)
+    signal Q2n, Q1n, Q0n : std_logic;
+
+begin
+
+    -- --------------------------------------------------------
+    -- Combinational Logic (根據卡諾圖化簡得到的布林式)
+    -- --------------------------------------------------------
+
+    -- Q2+ = Q1 Q0 X&apos;
+    Q2n &lt;= Q1 and Q0 and (not x);
+
+    -- Q1+ = Q2 Q0&apos; X&apos; + Q1&apos; Q0 X&apos; + Q2&apos; Q1&apos; X + Q1 Q0&apos; X
+    Q1n &lt;= (Q2 and not Q0 and not x) or 
+           (not Q1 and Q0 and not x) or 
+           (not Q2 and not Q1 and x) or 
+           (Q1 and not Q0 and x);
+
+    -- Q0+ = Q0&apos; X&apos; + Q2&apos; Q0&apos; + Q2&apos; Q1&apos; X
+    Q0n &lt;= (not Q0 and not x) or 
+           (not Q2 and not Q0) or 
+           (not Q2 and not Q1 and x);
+
+    -- Mealy Output: Z = (Q1 + Q2) Q0&apos; X
+    z   &lt;= (Q1 or Q2) and (not Q0) and x;
+
+    -- --------------------------------------------------------
+    -- Sequential Logic (狀態位移)
+    -- --------------------------------------------------------
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            -- 在時脈上升沿更新狀態
+            Q &lt;= Q2n &amp; Q1n &amp; Q0n;
+        end if;
+    end process;
+
+    -- 將內部狀態同步輸出給 q_out
+    q_out &lt;= Q;
+
+end architecture rtl;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>z,q_out:3</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>6</int>
+        </entry>
+      </elementAttributes>
+      <pos x="640" y="280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Splitter</elementName>
+      <elementAttributes>
+        <entry>
+          <string>splitterSpreading</string>
+          <int>2</int>
+        </entry>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Input Splitting</string>
+          <string>3</string>
+        </entry>
+        <entry>
+          <string>Output Splitting</string>
+          <string>1,1,1</string>
+        </entry>
+      </elementAttributes>
+      <pos x="920" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S2</string>
+        </entry>
+      </elementAttributes>
+      <pos x="840" y="440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S1</string>
+        </entry>
+      </elementAttributes>
+      <pos x="880" y="440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>S0</string>
+        </entry>
+      </elementAttributes>
+      <pos x="920" y="440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>z</string>
+        </entry>
+      </elementAttributes>
+      <pos x="980" y="440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>x</string>
+        </entry>
+      </elementAttributes>
+      <pos x="500" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>clk</string>
+        </entry>
+      </elementAttributes>
+      <pos x="460" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Data</elementName>
+      <elementAttributes/>
+      <pos x="420" y="-60"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="760" y="280"/>
+      <p2 x="980" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="280"/>
+      <p2 x="640" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="760" y="300"/>
+      <p2 x="920" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="300"/>
+      <p2 x="640" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="280"/>
+      <p2 x="980" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="260"/>
+      <p2 x="500" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="920" y="300"/>
+      <p2 x="920" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="260"/>
+      <p2 x="460" y="280"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

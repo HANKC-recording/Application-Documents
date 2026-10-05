@@ -1,0 +1,74 @@
+module counter_cell (
+    input clk,
+    input rst_n,
+    input start_init,       // 初始狀態：1為直接開始，0為等待
+    input wait_sig,         // 等待的訊號 (如 T2)
+    output reg done_sig,    // 完成後發出的訊號 (如 T1)
+    output reg [1:0] cnt
+);
+
+    reg state; // 0: COUNT, 1: WAIT
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            cnt <= 2'b00;
+            state <= start_init ? 1'b0 : 1'b1;
+            done_sig <= 1'b0;
+        end 
+        
+        else begin
+            case (state)
+                1'b0: begin // 計數狀態
+                    done_sig <= 1'b0;
+                    if (cnt == 2'b11) begin
+                        cnt <= 2'b00;
+                        done_sig <= 1'b1; // 數滿了，送出脈衝
+                        state <= 1'b1;    // 切換到等待模式
+                    end 
+                    else begin
+                        cnt <= cnt + 1'b1;
+                    end
+                end
+                
+                1'b1: begin // 等待狀態
+                    done_sig <= 1'b0;
+                    if (wait_sig) begin
+                        state <= 1'b0; // 收到對方的 T 訊號，回到計數模式
+                    end
+                end
+            endcase
+        end
+    end
+endmodule
+
+// --- 頂層模組 (Top Module) ---
+module top_module (
+    input clk,
+    input rst_n,
+    output [1:0] cnt_a,
+    output [1:0] cnt_b,
+    output t1,
+    output t2
+);
+
+    // 實例化 Counter A (Reset 後主動開始)
+    counter_cell counter_A (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start_init(1'b1), 
+        .wait_sig(t2),     // A 在等 B 的 T2
+        .done_sig(t1),     // A 完成後發出 T1
+        .cnt(cnt_a)
+    );
+
+    // 實例化 Counter B (Reset 後等待 A)
+    counter_cell counter_B (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start_init(1'b0),
+        .wait_sig(t1),     // B 在等 A 的 T1
+        .done_sig(t2),     // B 完成後發出 T2
+        .cnt(cnt_b)
+    );
+
+endmodule

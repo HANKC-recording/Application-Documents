@@ -1,0 +1,9 @@
+MODULE ser_adder
+	SUBMODULE full_adder_1bits
+		INSTANCE XLXI_1
+	SUBMODULE full_adder_1bits
+		INSTANCE XLXI_2
+	SUBMODULE full_adder_1bits
+		INSTANCE XLXI_3
+	SUBMODULE full_adder_1bits
+		INSTANCE XLXI_4
