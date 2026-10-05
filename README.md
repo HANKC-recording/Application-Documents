@@ -1,14 +1,6 @@
 # 🎓 研究所推甄有利資料 | Graduate Application Portfolio
 
 <div align="center">
-  <!-- 頂部精美狀態徽章 -->
-  <img src="https://shields.io" alt="Applicant">
-  <img src="https://shields.io" alt="Status">
-</div>
-
-<br />
-
-<div align="center">
   <!-- 核心動作按鈕：解決 GitHub 網頁版 5 頁限制 -->
   <a href="https://google.com" target="_blank">
     <img src="https://shields.io📖_線上流暢閱讀-完整推甄_PDF_全文_(破解5頁限制)-🚀_brightgreen?style=for-the-badge" alt="Read Online">
